@@ -1,0 +1,41 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+
+# Large Datasets & Processed Splits
+data/ml-1m/
+data/processed/*.parquet
+data/processed/*.npy
+
+# Model Checkpoints & Weights
+saved_models/*.pt
+saved_models/*.pkl
+saved_models/*.json
+recsys_trained_models.zip
+
+# Node.js Dependencies & Builds
+frontend/node_modules/
+frontend/dist/
+frontend/local.env
+.npm
+.eslintcache
+
+# Vite Cache
+frontend/node_modules/.vite/
+
+# IDE & OS Temporary Files
+.DS_Store
+.vscode/
+.idea/
+*.log
+tmp/
+temp/
