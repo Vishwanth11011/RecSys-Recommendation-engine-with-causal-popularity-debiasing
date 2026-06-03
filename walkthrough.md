@@ -85,21 +85,22 @@ Offline verification results show optimal metrics, matching target specification
 
 ## 🛠️ Deployment & Render Troubleshooting
 
-During deployment of the backend service on Render, we encountered a `FileNotFoundError` during application startup lifespan:
+### 1. Missing Model Weights (`FileNotFoundError`)
+During the first deployment, we encountered:
 ```
 FileNotFoundError: [Errno 2] No such file or directory: '/opt/render/project/src/saved_models/svd_model.pkl'
 ```
+- **Root Cause:** The model weight binaries in `saved_models/` were generated locally but never staged/committed. Also, the `*.npy` wildcard in `.gitignore` was ignoring key feature matrices.
+- **Solution:** Added exceptions in `.gitignore` for `user_features.npy` and `movie_features.npy`, then staged, committed, and pushed all weight assets to GitHub.
 
-### Root Cause
-1. **Model Weights Staging:** The model weight binaries in `saved_models/` were generated locally but were never staged or committed in the git repository.
-2. **Ignored Features:** The `*.npy` wildcard in `.gitignore` was preventing two critical runtime files for the Two-Tower model (`movie_features.npy` and `user_features.npy` in `data/processed/`) from being staged/committed.
+### 2. Out of Memory Crash (`used over 512Mi`)
+Render free tier instances have a strict **512MB RAM** limit. Loading all five recommender models along with 1 million ratings data using standard Pandas methods caused the backend to crash:
+```
+==> Out of memory (used over 512Mi)
+```
+We solved this by applying three memory-saving optimizations:
+1. **Stream-Parsing (No Pandas):** In `recommender.py`, we bypassed Pandas' `read_csv` and `.groupby().apply(...)` operations (which create millions of heavy Python helper objects). Instead, we read the 1-million ratings `ratings.dat` file line-by-line using a native Python file loop, reducing loading memory overhead by over **90%**.
+2. **SVD Model Pruning (35MB -> 7.9MB):** The surprise SVD model pickled object retained reference to the entire `trainset` training rating matrix (1M records). Since prediction only requires the factor matrices and biases, we replaced `model.trainset.ur` and `model.trainset.ir` lists with lightweight Python `range` objects. This cut the model's disk and memory footprint by **77.4%** while preserving identical predictions.
+3. **CPU-Only PyTorch:** Prepended `--extra-index-url https://download.pytorch.org/whl/cpu` to `requirements.txt`. On Linux servers (like Render), this forces pip to install the CPU-only version of PyTorch instead of the GPU/CUDA version, which cuts the library weight and startup RAM significantly.
 
-### Solution Applied
-1. **Adjusted `.gitignore`:** Added exceptions to ensure the Two-Tower features are tracked and pushed:
-   ```
-   !data/processed/movie_features.npy
-   !data/processed/user_features.npy
-   ```
-2. **Staged & Committed Files:** Tracked all files under `saved_models/` and the `.npy` files.
-3. **Pushed to GitHub:** Successfully pushed the model assets and configuration changes to GitHub. Render will now pull these files automatically during build/start.
 
