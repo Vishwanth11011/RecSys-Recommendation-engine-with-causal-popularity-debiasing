@@ -87,8 +87,8 @@ The models were trained on the **MovieLens 1M** dataset (1,000,209 ratings acros
 
 ### 1. Clone & Setup Virtual Environment
 ```bash
-git clone https://github.com/your-username/recsys-hybrid-engine.git
-cd recsys-hybrid-engine
+git clone https://github.com/your-username/recsys-hybrid-engine.git](https://github.com/Vishwanth11011/RecSys-Recommendation-engine-with-causal-popularity-debiasing.git
+cd recsys-Recommendation-engine-with-causal-popularity-debiasing
 
 # Create and activate python virtual environment
 python3 -m venv .venv
