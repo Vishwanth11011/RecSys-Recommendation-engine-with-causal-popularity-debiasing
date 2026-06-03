@@ -14,7 +14,7 @@ from src.models.ncf_model import NCF
 from src.models.two_tower import TwoTowerModel
 from src.models.debiaser import IPSDebiaser
 
-from src.data.loader import load_ratings, load_movies
+from src.data.loader import load_movies
 
 class UnifiedRecommender:
     def __init__(self):
@@ -54,6 +54,9 @@ class UnifiedRecommender:
                 "genres": row.genre_list if isinstance(row.genre_list, list) else [row.genres],
                 "year": float(row.year) if not pd.isna(row.year) else None
             }
+        del movies_df
+        import gc
+        gc.collect()
             
         n_users = len(self.user_enc.classes_)
         n_movies = len(self.movie_enc.classes_)
@@ -99,11 +102,33 @@ class UnifiedRecommender:
         self.two_tower_model.eval()
         
         print("UnifiedRecommender: Loading user history...")
-        ratings_df = load_ratings()
-        self.user_history = ratings_df.groupby("user_id")["movie_id"].apply(list).to_dict()
-        self.user_history_set = {uid: set(mids) for uid, mids in self.user_history.items()}
-        self.user_ratings = ratings_df.groupby("user_id")[["movie_id", "rating"]].apply(lambda x: list(zip(x["movie_id"], x["rating"]))).to_dict()
+        ratings_file = self.base_path / "data" / "ml-1m" / "ratings.dat"
+        if not ratings_file.exists():
+            from src.data.loader import download_and_extract_metadata
+            download_and_extract_metadata()
+            
+        self.user_history = {}
+        self.user_ratings = {}
         
+        if ratings_file.exists():
+            with open(ratings_file, "r", encoding="latin-1") as f:
+                for line in f:
+                    parts = line.strip().split("::")
+                    if len(parts) >= 3:
+                        uid = int(parts[0])
+                        mid = int(parts[1])
+                        rating = float(parts[2])
+                        
+                        if uid not in self.user_history:
+                            self.user_history[uid] = []
+                            self.user_ratings[uid] = []
+                        self.user_history[uid].append(mid)
+                        self.user_ratings[uid].append((mid, rating))
+                        
+        self.user_history_set = {uid: set(mids) for uid, mids in self.user_history.items()}
+        
+        import gc
+        gc.collect()
         print("UnifiedRecommender: Loading complete!")
         
     def recommend(self, user_id: int, candidate_movie_ids: list, model_type: str = "svd", debias: bool = False) -> list:
