@@ -103,4 +103,14 @@ We solved this by applying three memory-saving optimizations:
 2. **SVD Model Pruning (35MB -> 7.9MB):** The surprise SVD model pickled object retained reference to the entire `trainset` training rating matrix (1M records). Since prediction only requires the factor matrices and biases, we replaced `model.trainset.ur` and `model.trainset.ir` lists with lightweight Python `range` objects. This cut the model's disk and memory footprint by **77.4%** while preserving identical predictions.
 3. **CPU-Only PyTorch:** Prepended `--extra-index-url https://download.pytorch.org/whl/cpu` to `requirements.txt`. On Linux servers (like Render), this forces pip to install the CPU-only version of PyTorch instead of the GPU/CUDA version, which cuts the library weight and startup RAM significantly.
 
+### 3. CORS Preflight Blocker (`Blocked by CORS Policy`)
+When the frontend dashboard made fetch calls to the Render API, the browser blocked them with the following error:
+```
+Access to fetch at '...' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present...
+```
+- **Root Cause:** In `main.py`, the FastAPI backend CORS middleware had `allow_credentials=True` set alongside wildcard origins (`allow_origins=["*"]`). Under CORS protocols, a wildcard origin cannot be combined with credentials support. The browser throws a preflight CORS violation.
+- **Solution:** Changed `allow_credentials` to `False` in the backend's `CORSMiddleware` configuration (as the UI uses standard fetch requests and does not send cross-origin credentials/cookies). Wildcard origins are now fully allowed and accepted by browsers.
+
+
+
 
