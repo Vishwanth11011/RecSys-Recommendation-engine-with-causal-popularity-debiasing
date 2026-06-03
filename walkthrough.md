@@ -80,3 +80,26 @@ Offline verification results show optimal metrics, matching target specification
 
 - **Popularity Debiasing Effect:** IPS debiasing increases catalog coverage from `0.14` to `0.22`, spreading recommendations to long-tail indie items instead of over-concentrating on top-10 blockbusters.
 - **Retrospective Speedup:** Two-Tower matrix-multiplication retrieval is **5x faster** than NCF and **2x faster** than SVD on M1 CPU!
+
+---
+
+## 🛠️ Deployment & Render Troubleshooting
+
+During deployment of the backend service on Render, we encountered a `FileNotFoundError` during application startup lifespan:
+```
+FileNotFoundError: [Errno 2] No such file or directory: '/opt/render/project/src/saved_models/svd_model.pkl'
+```
+
+### Root Cause
+1. **Model Weights Staging:** The model weight binaries in `saved_models/` were generated locally but were never staged or committed in the git repository.
+2. **Ignored Features:** The `*.npy` wildcard in `.gitignore` was preventing two critical runtime files for the Two-Tower model (`movie_features.npy` and `user_features.npy` in `data/processed/`) from being staged/committed.
+
+### Solution Applied
+1. **Adjusted `.gitignore`:** Added exceptions to ensure the Two-Tower features are tracked and pushed:
+   ```
+   !data/processed/movie_features.npy
+   !data/processed/user_features.npy
+   ```
+2. **Staged & Committed Files:** Tracked all files under `saved_models/` and the `.npy` files.
+3. **Pushed to GitHub:** Successfully pushed the model assets and configuration changes to GitHub. Render will now pull these files automatically during build/start.
+
