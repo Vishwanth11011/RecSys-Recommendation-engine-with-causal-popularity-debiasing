@@ -15,11 +15,14 @@ ENV/
 data/ml-1m/
 data/processed/*.parquet
 data/processed/*.npy
+!data/processed/movie_features.npy
+!data/processed/user_features.npy
 
-# Model Checkpoints & Weights
-saved_models/*.pt
-saved_models/*.pkl
-saved_models/*.json
+
+# Model Checkpoints & Weights (Committed to Git for direct Render deployment)
+# saved_models/*.pt
+# saved_models/*.pkl
+# saved_models/*.json
 recsys_trained_models.zip
 
 # Node.js Dependencies & Builds

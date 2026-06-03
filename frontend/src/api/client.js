@@ -1,4 +1,6 @@
-const API_BASE_URL = "http://localhost:8000"; // Local FastAPI default port
+const API_BASE_URL = import.meta.env.DEV 
+  ? "http://localhost:8000" 
+  : "https://recsys-backend.onrender.com"; // Your Render backend URL
 
 export async function fetchFromAPI(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

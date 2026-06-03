@@ -1,0 +1,44 @@
+{
+    "SVD Baseline": {
+        "NDCG@10": 0.1311,
+        "HitRate@10": 0.2585,
+        "Precision@10": 0.0259,
+        "Coverage": 0.4247,
+        "InferenceTimeMs": 1.15
+    },
+    "SVD Debiased": {
+        "NDCG@10": 0.0087,
+        "HitRate@10": 0.018,
+        "Precision@10": 0.0018,
+        "Coverage": 0.2534,
+        "InferenceTimeMs": 1.15
+    },
+    "Neural CF (NCF)": {
+        "NDCG@10": 0.3721,
+        "HitRate@10": 0.64,
+        "Precision@10": 0.064,
+        "Coverage": 0.7285,
+        "InferenceTimeMs": 2.5
+    },
+    "Neural CF + IPS": {
+        "NDCG@10": 0.3545,
+        "HitRate@10": 0.6335,
+        "Precision@10": 0.0633,
+        "Coverage": 0.718,
+        "InferenceTimeMs": 2.5
+    },
+    "Two-Tower": {
+        "NDCG@10": 0.2009,
+        "HitRate@10": 0.3625,
+        "Precision@10": 0.0362,
+        "Coverage": 0.3818,
+        "InferenceTimeMs": 0.55
+    },
+    "Two-Tower + IPS": {
+        "NDCG@10": 0.0137,
+        "HitRate@10": 0.0305,
+        "Precision@10": 0.003,
+        "Coverage": 0.3292,
+        "InferenceTimeMs": 0.55
+    }
+}
