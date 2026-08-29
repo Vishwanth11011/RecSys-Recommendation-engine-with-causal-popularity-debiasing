@@ -42,3 +42,7 @@ frontend/node_modules/.vite/
 *.log
 tmp/
 temp/
+
+# Project Build & Walkthrough Documents
+recsys_build_prompt.md
+walkthrough.md
